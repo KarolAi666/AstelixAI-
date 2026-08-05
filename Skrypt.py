@@ -582,7 +582,7 @@ Astelix AI to zaawansowany system sztucznej inteligencji, który łączy najleps
 
 ```bash
 # 1. Pobierz kod
-git clone https://github.com/TWOJA_NAZWA/astelix-ai.git
+git clone https://github.com/KarolAi666/astelix-ai.git
 cd astelix-ai
 
 # 2. Zainstaluj zależności
