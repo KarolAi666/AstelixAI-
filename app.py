@@ -1,5 +1,4 @@
-
-#!/usr/bin/env python3
+        #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -60,16 +59,9 @@ class ChatResponse(BaseModel):
 
 class AIEngine:
     def __init__(self):
-        self.models = {
-            "GPT-4": {"available": True},
-            "Claude 3": {"available": True},
-            "Gemini Pro": {"available": True},
-            "Llama 2": {"available": True},
-            "Mistral": {"available": True}
-        }
-        
+        self.models = ["GPT-4", "Claude 3", "Gemini Pro", "Llama 2", "Mistral"]
         self.responses = {
-            "GENERAL": "🤖 Oto ogólna odpowiedź:\n\n",
+            "GENERAL": "🤖 To jest odpowiedź na Twoje pytanie:\n\n",
             "CODING": "💻 Kod:\n\n```python\n",
             "ANALYSIS": "📊 Analiza:\n\n",
             "CREATION": "🎨 Kreatywna odpowiedź:\n\n",
@@ -79,16 +71,17 @@ class AIEngine:
     
     async def process(self, query: str, mode: str, temperature: float, max_tokens: int) -> Dict:
         import random
-        await asyncio.sleep(random.uniform(0.3, 0.8))
-        model = random.choice(list(self.models.keys()))
+        
+        # BRAK symulacji czasu - błyskawiczna odpowiedź!
+        model = random.choice(self.models)
         
         responses = {
-            "GENERAL": f"{self.responses['GENERAL']}Odpowiedź na: '{query}'\nModel: {model}",
-            "CODING": f"{self.responses['CODING']}# Kod dla: {query}\ndef solution():\n    return True\n```\nModel: {model}",
-            "ANALYSIS": f"{self.responses['ANALYSIS']}Analiza: {query}\nWnioski: ...\nModel: {model}",
-            "CREATION": f"{self.responses['CREATION']}Inspiracje: {query}\nPomysły: ...\nModel: {model}",
-            "REASONING": f"{self.responses['REASONING']}Kroki: 1. ... 2. ...\nModel: {model}",
-            "MULTI_MODAL": f"{self.responses['MULTI_MODAL']}Analiza multimodalna: {query}\nModel: {model}"
+            "GENERAL": f"{self.responses['GENERAL']}Odpowiedź na: '{query}'\n\n📌 Użyty model: {model}\n✅ Status: Sukces",
+            "CODING": f"{self.responses['CODING']}# Kod dla: {query}\ndef solution():\n    return True\n```\n\n📌 Użyty model: {model}",
+            "ANALYSIS": f"{self.responses['ANALYSIS']}Analiza: {query}\n\nWnioski: ...\n\n📌 Użyty model: {model}",
+            "CREATION": f"{self.responses['CREATION']}Inspiracje: {query}\n\nPomysły: ...\n\n📌 Użyty model: {model}",
+            "REASONING": f"{self.responses['REASONING']}Kroki: 1. ... 2. ...\n\n📌 Użyty model: {model}",
+            "MULTI_MODAL": f"{self.responses['MULTI_MODAL']}Analiza: {query}\n\n📌 Użyty model: {model}"
         }
         
         return {
@@ -106,7 +99,7 @@ async def get_index():
         if os.path.exists("templates/index.html"):
             with open("templates/index.html", "r", encoding="utf-8") as f:
                 return f.read()
-        return HTMLResponse("""<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>""")
+        return HTMLResponse("<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>")
     except:
         return HTMLResponse("<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>")
 
@@ -122,13 +115,13 @@ async def chat(request: ChatRequest):
         response=result["response"],
         model=result["model"],
         confidence=result["confidence"],
-        processing_time=0.5,
+        processing_time=0.1,
         timestamp=datetime.utcnow()
     )
 
 @app.get("/api/v1/models")
 async def get_models():
-    return {"system": APP_NAME, "models": list(ai_engine.models.keys())}
+    return {"system": APP_NAME, "models": ai_engine.models}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -145,7 +138,7 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await websocket.send_text(json.dumps({"type": "start", "model": result["model"]}))
             for word in result["response"].split():
-                await asyncio.sleep(0.02)
+                await asyncio.sleep(0.01)
                 await websocket.send_text(json.dumps({"type": "chunk", "data": word + " "}))
             await websocket.send_text(json.dumps({"type": "end"}))
     except:
