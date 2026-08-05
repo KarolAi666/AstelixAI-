@@ -594,4 +594,15 @@ python app.py --host 0.0.0.0 --port 8000
 
 ## 📄 5. `LICENSE`
 python:3.11-slimWORKDIR /app# Kopiuj plikiCOPY requirements.txt .RUN pip install --no-cache-dir -r requirements.txtCOPY . .# PortEXPOSE 8000# UruchomCMD ["python", "app.py", "--host", "0.0.0.0", "--port", "8000"]
-0 zatwierdzonych komentarzyUwagi0 ( 0 )Zablokuj rozmowę
+0 zatwierdzonych komentarzyUwagi0 ( 0 )Zablokuj rozmowęservices:
+  - type: web
+    name: astelix-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+    plan: free
