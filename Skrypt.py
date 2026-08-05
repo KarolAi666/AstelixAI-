@@ -1,41 +1,4 @@
-astelix-ai# Przejdź do katalogu
-cd astelix-ai
-
-# Sprawdź co jest
-ls -la
-
-# Jeśli brakuje requirements.txt - utwórz
-echo "fastapi==0.104.1" > requirements.txt
-echo "uvicorn[standard]==0.24.0" >> requirements.txt
-echo "pydantic==2.5.0" >> requirements.txt
-echo "python-dotenv==1.0.0" >> requirements.txt
-echo "aiofiles==23.2.1" >> requirements.txt
-echo "jinja2==3.1.2" >> requirements.txt
-echo "httpx==0.25.1" >> requirements.txt
-echo "websockets==12.0" >> requirements.txt
-echo "python-multipart==0.0.6" >> requirements.txt
-
-# Dodaj do Gita
-git add requirements.txt
-git commit -m "Add requirements.txt"
-git push/
-├── app.py
-├── requirements.txt
-├── .gitignore
-├── README.md
-├── LICENSE
-├── render.yaml
-├── templates/
-│   └── index.html
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   │   └── app.js
-│   └── icons/
-│       └── favicon.ico
-└── data/
-    └── .gitkeep#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -163,7 +126,6 @@ class AIEngine:
         # Generuj odpowiedź
         base_response = self.responses.get(mode, self.responses["GENERAL"])
         
-        # Różne odpowiedzi w zależności od trybu
         responses = {
             "GENERAL": f"""{base_response}To jest ogólna odpowiedź na: '{query}'
 
@@ -273,7 +235,6 @@ Połączenie wszystkich modalności daje następujący obraz...
 ✅ **Status:** Analiza zakończona"""
         }
 
-        # Wybierz odpowiedź
         response_text = responses.get(mode, responses["GENERAL"])
         
         return {
@@ -550,7 +511,29 @@ aiofiles==23.2.1
 jinja2==3.1.2
 httpx==0.25.1
 websockets==12.0
-python-multipart==0.0.6# Python
+python-multipart==0.0.6FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["python", "app.py", "--host", "0.0.0.0", "--port", "8000"]services:
+  - type: web
+    name: astelix-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+    plan: free# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -602,7 +585,7 @@ Astelix AI to zaawansowany system sztucznej inteligencji, który łączy najleps
 
 ```bash
 # 1. Pobierz kod
-git clone https://github.com/KarolAi666/astelix-ai.git
+git clone https://github.com/TWOJA_NAZWA/astelix-ai.git
 cd astelix-ai
 
 # 2. Zainstaluj zależności
@@ -612,38 +595,5 @@ pip install -r requirements.txt
 python app.py --host 0.0.0.0 --port 8000
 ---
 
-## 📄 5. `LICENSE`
-python:3.11-slimWORKDIR /app# Kopiuj plikiCOPY requirements.txt .RUN pip install --no-cache-dir -r requirements.txtCOPY . .# PortEXPOSE 8000# UruchomCMD ["python", "app.py", "--host", "0.0.0.0", "--port", "8000"]
-0 zatwierdzonych komentarzyUwagi0 ( 0 )Zablokuj rozmowęservices:
-  - type: web
-    name: astelix-ai
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py --host 0.0.0.0 --port 10000
-    envVars:
-      - key: PORT
-        value: 10000
-      - key: HOST
-        value: 0.0.0.0
-    plan: free
-# Przejdź do katalogu
-cd astelix-ai
-
-# Sprawdź co jest
-ls -la
-
-# Jeśli brakuje requirements.txt - utwórz
-echo "fastapi==0.104.1" > requirements.txt
-echo "uvicorn[standard]==0.24.0" >> requirements.txt
-echo "pydantic==2.5.0" >> requirements.txt
-echo "python-dotenv==1.0.0" >> requirements.txt
-echo "aiofiles==23.2.1" >> requirements.txt
-echo "jinja2==3.1.2" >> requirements.txt
-echo "httpx==0.25.1" >> requirements.txt
-echo "websockets==12.0" >> requirements.txt
-echo "python-multipart==0.0.6" >> requirements.txt
-
-# Dodaj do Gita
-git add requirements.txt
-git commit -m "Add requirements.txt"
-git push
+## 📄 PLIK 7: `LICENSE`
+**Gdzie:** W głównym folderze `astelix-ai/`
