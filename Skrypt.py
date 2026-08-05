@@ -593,3 +593,5 @@ python app.py --host 0.0.0.0 --port 8000
 ---
 
 ## 📄 5. `LICENSE`
+python:3.11-slimWORKDIR /app# Kopiuj plikiCOPY requirements.txt .RUN pip install --no-cache-dir -r requirements.txtCOPY . .# PortEXPOSE 8000# UruchomCMD ["python", "app.py", "--host", "0.0.0.0", "--port", "8000"]
+0 zatwierdzonych komentarzyUwagi0 ( 0 )Zablokuj rozmowę
