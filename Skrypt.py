@@ -1,4 +1,24 @@
-astelix-ai/
+astelix-ai# Przejdź do katalogu
+cd astelix-ai
+
+# Sprawdź co jest
+ls -la
+
+# Jeśli brakuje requirements.txt - utwórz
+echo "fastapi==0.104.1" > requirements.txt
+echo "uvicorn[standard]==0.24.0" >> requirements.txt
+echo "pydantic==2.5.0" >> requirements.txt
+echo "python-dotenv==1.0.0" >> requirements.txt
+echo "aiofiles==23.2.1" >> requirements.txt
+echo "jinja2==3.1.2" >> requirements.txt
+echo "httpx==0.25.1" >> requirements.txt
+echo "websockets==12.0" >> requirements.txt
+echo "python-multipart==0.0.6" >> requirements.txt
+
+# Dodaj do Gita
+git add requirements.txt
+git commit -m "Add requirements.txt"
+git push/
 ├── app.py
 ├── requirements.txt
 ├── .gitignore
@@ -606,3 +626,24 @@ python:3.11-slimWORKDIR /app# Kopiuj plikiCOPY requirements.txt .RUN pip install
       - key: HOST
         value: 0.0.0.0
     plan: free
+# Przejdź do katalogu
+cd astelix-ai
+
+# Sprawdź co jest
+ls -la
+
+# Jeśli brakuje requirements.txt - utwórz
+echo "fastapi==0.104.1" > requirements.txt
+echo "uvicorn[standard]==0.24.0" >> requirements.txt
+echo "pydantic==2.5.0" >> requirements.txt
+echo "python-dotenv==1.0.0" >> requirements.txt
+echo "aiofiles==23.2.1" >> requirements.txt
+echo "jinja2==3.1.2" >> requirements.txt
+echo "httpx==0.25.1" >> requirements.txt
+echo "websockets==12.0" >> requirements.txt
+echo "python-multipart==0.0.6" >> requirements.txt
+
+# Dodaj do Gita
+git add requirements.txt
+git commit -m "Add requirements.txt"
+git push
