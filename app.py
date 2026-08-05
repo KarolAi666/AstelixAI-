@@ -1,4 +1,4 @@
-        #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -43,6 +43,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ============ MODELE DANYCH ============
+
 class ChatRequest(BaseModel):
     query: str
     mode: str = "GENERAL"
@@ -57,11 +59,13 @@ class ChatResponse(BaseModel):
     processing_time: float
     timestamp: datetime
 
+# ============ SILNIK AI ============
+
 class AIEngine:
     def __init__(self):
         self.models = ["GPT-4", "Claude 3", "Gemini Pro", "Llama 2", "Mistral"]
         self.responses = {
-            "GENERAL": "🤖 To jest odpowiedź na Twoje pytanie:\n\n",
+            "GENERAL": "🤖 To jest ogólna odpowiedź:\n\n",
             "CODING": "💻 Kod:\n\n```python\n",
             "ANALYSIS": "📊 Analiza:\n\n",
             "CREATION": "🎨 Kreatywna odpowiedź:\n\n",
@@ -69,17 +73,15 @@ class AIEngine:
             "MULTI_MODAL": "🌐 Multimodalna:\n\n"
         }
     
-    async def process(self, query: str, mode: str, temperature: float, max_tokens: int) -> Dict:
+    async def process(self, query: str, mode: str, temperature: float, max_tokens: int):
         import random
-        
-        # BRAK symulacji czasu - błyskawiczna odpowiedź!
         model = random.choice(self.models)
         
         responses = {
-            "GENERAL": f"{self.responses['GENERAL']}Odpowiedź na: '{query}'\n\n📌 Użyty model: {model}\n✅ Status: Sukces",
+            "GENERAL": f"{self.responses['GENERAL']}Odpowiedź na: '{query}'\n\n📌 Użyty model: {model}",
             "CODING": f"{self.responses['CODING']}# Kod dla: {query}\ndef solution():\n    return True\n```\n\n📌 Użyty model: {model}",
-            "ANALYSIS": f"{self.responses['ANALYSIS']}Analiza: {query}\n\nWnioski: ...\n\n📌 Użyty model: {model}",
-            "CREATION": f"{self.responses['CREATION']}Inspiracje: {query}\n\nPomysły: ...\n\n📌 Użyty model: {model}",
+            "ANALYSIS": f"{self.responses['ANALYSIS']}Analiza: {query}\n\n📌 Użyty model: {model}",
+            "CREATION": f"{self.responses['CREATION']}Inspiracje: {query}\n\n📌 Użyty model: {model}",
             "REASONING": f"{self.responses['REASONING']}Kroki: 1. ... 2. ...\n\n📌 Użyty model: {model}",
             "MULTI_MODAL": f"{self.responses['MULTI_MODAL']}Analiza: {query}\n\n📌 Użyty model: {model}"
         }
@@ -93,6 +95,8 @@ class AIEngine:
 
 ai_engine = AIEngine()
 
+# ============ ENDPOINTY ============
+
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
     try:
@@ -100,16 +104,29 @@ async def get_index():
             with open("templates/index.html", "r", encoding="utf-8") as f:
                 return f.read()
         return HTMLResponse("<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>")
-    except:
-        return HTMLResponse("<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>")
+    except Exception as e:
+        return HTMLResponse(f"<h1>Error: {e}</h1>")
 
 @app.get("/api/v1/health")
 async def health_check():
-    return {"status": "healthy", "system": APP_NAME, "version": APP_VERSION, "author": AUTHOR}
+    return {
+        "status": "healthy",
+        "system": APP_NAME,
+        "version": APP_VERSION,
+        "author": AUTHOR,
+        "email": EMAIL,
+        "phone": PHONE,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 @app.post("/api/v1/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    result = await ai_engine.process(request.query, request.mode, request.temperature, request.max_tokens)
+    result = await ai_engine.process(
+        request.query,
+        request.mode,
+        request.temperature,
+        request.max_tokens
+    )
     return ChatResponse(
         id=str(uuid.uuid4()),
         response=result["response"],
@@ -121,7 +138,11 @@ async def chat(request: ChatRequest):
 
 @app.get("/api/v1/models")
 async def get_models():
-    return {"system": APP_NAME, "models": ai_engine.models}
+    return {
+        "system": APP_NAME,
+        "models": ai_engine.models,
+        "active": len(ai_engine.models)
+    }
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -141,9 +162,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 await asyncio.sleep(0.01)
                 await websocket.send_text(json.dumps({"type": "chunk", "data": word + " "}))
             await websocket.send_text(json.dumps({"type": "end"}))
-    except:
+    except WebSocketDisconnect:
         pass
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("app:app", host="0.0.0.0", port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
