@@ -1,62 +1,26 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-ASTELIX AI - Serwer Główny
-© 2024 Karol Jaskólski - Wszelkie prawa zastrzeżone
-📧 cocieto2580123@gmail.com
-📞 +48 791 380 755
-"""
-
-import os
-import json
-import uuid
-import asyncio
-import logging
-from datetime import datetime
-from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, HTTPException, Request, UploadFile, File, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import uvicorn
-from dotenv import load_dotenv
+import random
+import uuid
+from datetime import datetime
 
-load_dotenv()
+app = FastAPI(title="Astelix AI", version="4.0.0")
 
-APP_NAME = "Astelix AI"
-APP_VERSION = "4.0.0"
-AUTHOR = "Karol Jaskólski"
-EMAIL = "cocieto2580123@gmail.com"
-PHONE = "+48 791 380 755"
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-app = FastAPI(title=APP_NAME, version=APP_VERSION)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ============ MODELE DANYCH ============
+# ============ MODELE ============
 
 class ChatRequest(BaseModel):
     query: str
     mode: str = "GENERAL"
-    temperature: float = 0.7
-    max_tokens: int = 1000
 
 class ChatResponse(BaseModel):
     id: str
     response: str
     model: str
-    confidence: float
-    processing_time: float
     timestamp: datetime
 
 # ============ SILNIK AI ============
@@ -64,33 +28,20 @@ class ChatResponse(BaseModel):
 class AIEngine:
     def __init__(self):
         self.models = ["GPT-4", "Claude 3", "Gemini Pro", "Llama 2", "Mistral"]
-        self.responses = {
-            "GENERAL": "🤖 To jest ogólna odpowiedź:\n\n",
-            "CODING": "💻 Kod:\n\n```python\n",
-            "ANALYSIS": "📊 Analiza:\n\n",
-            "CREATION": "🎨 Kreatywna odpowiedź:\n\n",
-            "REASONING": "🧠 Rozumowanie:\n\n",
-            "MULTI_MODAL": "🌐 Multimodalna:\n\n"
-        }
     
-    async def process(self, query: str, mode: str, temperature: float, max_tokens: int):
-        import random
+    def process(self, query: str, mode: str):
         model = random.choice(self.models)
-        
         responses = {
-            "GENERAL": f"{self.responses['GENERAL']}Odpowiedź na: '{query}'\n\n📌 Użyty model: {model}",
-            "CODING": f"{self.responses['CODING']}# Kod dla: {query}\ndef solution():\n    return True\n```\n\n📌 Użyty model: {model}",
-            "ANALYSIS": f"{self.responses['ANALYSIS']}Analiza: {query}\n\n📌 Użyty model: {model}",
-            "CREATION": f"{self.responses['CREATION']}Inspiracje: {query}\n\n📌 Użyty model: {model}",
-            "REASONING": f"{self.responses['REASONING']}Kroki: 1. ... 2. ...\n\n📌 Użyty model: {model}",
-            "MULTI_MODAL": f"{self.responses['MULTI_MODAL']}Analiza: {query}\n\n📌 Użyty model: {model}"
+            "GENERAL": f"🤖 To jest ogólna odpowiedź na: '{query}'\n\n📌 Użyty model: {model}",
+            "CODING": f"💻 Kod dla: {query}\n```python\ndef solution():\n    return True\n```\n\n📌 Użyty model: {model}",
+            "ANALYSIS": f"📊 Analiza: {query}\n\n📌 Użyty model: {model}",
+            "CREATION": f"🎨 Inspiracje: {query}\n\n📌 Użyty model: {model}",
+            "REASONING": f"🧠 Rozumowanie: {query}\n\n📌 Użyty model: {model}",
+            "MULTI_MODAL": f"🌐 Analiza multimodalna: {query}\n\n📌 Użyty model: {model}"
         }
-        
         return {
             "response": responses.get(mode, responses["GENERAL"]),
-            "model": model,
-            "confidence": random.uniform(0.78, 0.97),
-            "tokens_used": random.randint(100, max_tokens)
+            "model": model
         }
 
 ai_engine = AIEngine()
@@ -99,74 +50,36 @@ ai_engine = AIEngine()
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
-    try:
-        if os.path.exists("templates/index.html"):
-            with open("templates/index.html", "r", encoding="utf-8") as f:
-                return f.read()
-        return HTMLResponse("<h1>⭐ Astelix AI</h1><p>✅ Serwer działa!</p>")
-    except Exception as e:
-        return HTMLResponse(f"<h1>Error: {e}</h1>")
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head><title>Astelix AI</title></head>
+    <body style="background:#0f0a1a;color:white;font-family:system-ui;text-align:center;padding:40px;">
+        <h1 style="font-size:3rem;background:linear-gradient(135deg,#7c3aed,#a78bfa);-webkit-background-clip:text;color:transparent;">⭐ Astelix AI</h1>
+        <p style="color:#a78bfa;">✅ Serwer działa!</p>
+        <p style="color:#94a3b8;">© 2024 Karol Jaskólski</p>
+        <p style="color:#94a3b8;">📧 cocieto2580123@gmail.com</p>
+    </body>
+    </html>
+    """
 
 @app.get("/api/v1/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "system": APP_NAME,
-        "version": APP_VERSION,
-        "author": AUTHOR,
-        "email": EMAIL,
-        "phone": PHONE,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"status": "healthy", "system": "Astelix AI", "version": "4.0.0"}
 
-@app.post("/api/v1/chat", response_model=ChatResponse)
+@app.post("/api/v1/chat")
 async def chat(request: ChatRequest):
-    result = await ai_engine.process(
-        request.query,
-        request.mode,
-        request.temperature,
-        request.max_tokens
-    )
+    result = ai_engine.process(request.query, request.mode)
     return ChatResponse(
         id=str(uuid.uuid4()),
         response=result["response"],
         model=result["model"],
-        confidence=result["confidence"],
-        processing_time=0.1,
         timestamp=datetime.utcnow()
     )
 
 @app.get("/api/v1/models")
 async def get_models():
-    return {
-        "system": APP_NAME,
-        "models": ai_engine.models,
-        "active": len(ai_engine.models)
-    }
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            data = await websocket.receive_text()
-            request = json.loads(data)
-            result = await ai_engine.process(
-                request.get('query', ''),
-                request.get('mode', 'GENERAL'),
-                request.get('temperature', 0.7),
-                request.get('max_tokens', 1000)
-            )
-            await websocket.send_text(json.dumps({"type": "start", "model": result["model"]}))
-            for word in result["response"].split():
-                await asyncio.sleep(0.01)
-                await websocket.send_text(json.dumps({"type": "chunk", "data": word + " "}))
-            await websocket.send_text(json.dumps({"type": "end"}))
-    except WebSocketDisconnect:
-        pass
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
+    return {"models": ai_engine.models}
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000)    
