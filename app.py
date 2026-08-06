@@ -1,27 +1,13 @@
-    #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 import random
-import uuid
-from datetime import datetime
+import json
 
 app = FastAPI(title="Astelix AI", version="4.0.0")
-
-# ============ MODELE ============
-
-class ChatRequest(BaseModel):
-    query: str
-    mode: str = "GENERAL"
-
-class ChatResponse(BaseModel):
-    id: str
-    response: str
-    model: str
-    timestamp: datetime
 
 # ============ SILNIK AI ============
 
@@ -39,10 +25,7 @@ class AIEngine:
             "REASONING": f"🧠 Rozumowanie: {query}\n\n📌 Użyty model: {model}",
             "MULTI_MODAL": f"🌐 Analiza multimodalna: {query}\n\n📌 Użyty model: {model}"
         }
-        return {
-            "response": responses.get(mode, responses["GENERAL"]),
-            "model": model
-        }
+        return responses.get(mode, responses["GENERAL"])
 
 ai_engine = AIEngine()
 
@@ -68,14 +51,15 @@ async def health_check():
     return {"status": "healthy", "system": "Astelix AI", "version": "4.0.0"}
 
 @app.post("/api/v1/chat")
-async def chat(request: ChatRequest):
-    result = ai_engine.process(request.query, request.mode)
-    return ChatResponse(
-        id=str(uuid.uuid4()),
-        response=result["response"],
-        model=result["model"],
-        timestamp=datetime.utcnow()
-    )
+async def chat(request: Request):
+    try:
+        body = await request.json()
+        query = body.get("query", "")
+        mode = body.get("mode", "GENERAL")
+        response = ai_engine.process(query, mode)
+        return {"response": response, "model": "GPT-4"}
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/api/v1/models")
 async def get_models():
