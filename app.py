@@ -32,7 +32,7 @@ class AIEngine:
     def process(self, query: str, mode: str):
         model = random.choice(self.models)
         responses = {
-            "GENERAL": f"🤖 To jest ogólna odpowiedź na: '{query}'\n\n📌 Użyty model: {model}",
+            "GENERAL": f"🤖 Ogólna odpowiedź na: '{query}'\n\n📌 Użyty model: {model}",
             "CODING": f"💻 Kod dla: {query}\n```python\ndef solution():\n    return True\n```\n\n📌 Użyty model: {model}",
             "ANALYSIS": f"📊 Analiza: {query}\n\n📌 Użyty model: {model}",
             "CREATION": f"🎨 Inspiracje: {query}\n\n📌 Użyty model: {model}",
@@ -82,4 +82,4 @@ async def get_models():
     return {"models": ai_engine.models}
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000)    
+    uvicorn.run("app:app", host="0.0.0.0", port=8000)
